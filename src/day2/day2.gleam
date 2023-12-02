@@ -1,5 +1,6 @@
 import gleam/int
 import gleam/io
+import gleam/iterator
 import gleam/list
 import gleam/result
 import gleam/set
@@ -25,37 +26,35 @@ pub fn get_game_results(str: String) -> List(Game) {
   let assert Ok(id) = int.parse(id)
   let game_results = string.split(results, "; ")
 
-  game_results
-  |> list.map(fn(game_result) {
-    game_result
-    |> string.split(", ")
-    |> list.fold(Game(id, 0, 0, 0), fn(game, color_count) {
-      let assert [count, color] = string.split(color_count, " ")
-      let assert Ok(count) = int.parse(count)
+  use game_result <- list.map(game_results)
+  let color_count = string.split(game_result, ", ")
+  use game, color_count <- list.fold(color_count, Game(id, 0, 0, 0))
+  let assert [count, color] = string.split(color_count, " ")
+  let assert Ok(count) = int.parse(count)
 
-      case color {
-        "green" -> Game(..game, green: game.green + count)
-        "red" -> Game(..game, red: game.red + count)
-        "blue" -> Game(..game, blue: game.blue + count)
-        _ -> game
-      }
-    })
-  })
+  case color {
+    "green" -> Game(..game, green: game.green + count)
+    "red" -> Game(..game, red: game.red + count)
+    "blue" -> Game(..game, blue: game.blue + count)
+    _ -> game
+  }
 }
 
 pub fn part_one() {
   let valid_game = Game(id: 0, red: 12, green: 13, blue: 14)
   parse_input()
-  |> list.map(get_game_results)
-  |> list.filter(fn(games) {
+  |> iterator.from_list
+  |> iterator.map(get_game_results)
+  |> iterator.filter(fn(games) {
     list.all(games, fn(game) {
       game.red <= valid_game.red && game.green <= valid_game.green && game.blue <= valid_game.blue
     })
   })
-  |> list.map(fn(games) {
+  |> iterator.map(fn(games) {
     let assert Ok(first) = list.first(games)
     first.id
   })
+  |> iterator.to_list
   |> set.from_list
   |> set.fold(0, fn(acc, num) { acc + num })
   |> fn(res) { io.println("Sum of valid game IDs is: " <> int.to_string(res)) }
@@ -63,8 +62,9 @@ pub fn part_one() {
 
 pub fn part_two() {
   parse_input()
-  |> list.map(get_game_results)
-  |> list.map(fn(games) {
+  |> iterator.from_list
+  |> iterator.map(get_game_results)
+  |> iterator.map(fn(games) {
     let assert Ok(res) =
       list.reduce(games, fn(prev, next) {
         Game(
@@ -76,7 +76,8 @@ pub fn part_two() {
       })
     res
   })
-  |> list.map(fn(game) { game.red * game.green * game.blue })
+  |> iterator.map(fn(game) { game.red * game.green * game.blue })
+  |> iterator.to_list
   |> int.sum
   |> fn(res) { io.println("Sum of game powers is: " <> int.to_string(res)) }
 }
