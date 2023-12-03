@@ -78,14 +78,8 @@ fn parse_row(str: String, row: Int) -> Schematic {
     }
   })
   |> fn(state) {
-    let assert #(schematic, current_number, number_start) = state
-    case current_number {
-      "" -> schematic
-      num -> {
-        let assert Some(start) = number_start
-        add_number(schematic, start, num)
-      }
-    }
+    let assert #(schematic, _current_number, _number_start) = state
+    schematic
   }
 }
 
