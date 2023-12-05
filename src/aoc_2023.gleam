@@ -2,6 +2,7 @@ import day1/day1
 import day2/day2
 import day3/day3
 import day4/day4
+import day5/day5
 import gleam/int
 import gleam/io
 import gleam/list
@@ -28,6 +29,8 @@ pub fn main() {
     day3.part_two,
     day4.part_one,
     day4.part_two,
+    day5.part_one,
   ]
+  // day5.part_two,
   |> list.each(run)
 }
